@@ -44,20 +44,6 @@ case class Puzzle2(l: List[String]) extends Puzzle {
 
 case class Puzzle3(value: List[String]) extends Puzzle {
 
-//  def createMapLine(str: String): Map[String, Map[String, Int]] = {
-//    val gameNumberParts = str.split(":").map(_.trim).toList
-//    val gameDayAttempts = gameNumberParts.reverse.head.split(";").toList
-//    val gameNumber = gameNumberParts.head.split(" ").toList.reverse.head
-//    val doMap = (for {
-//      attempt <- gameDayAttempts
-//      efforts = attempt.split(", ").toList.map(x => x.trim.split(" "))
-//      //flattenedEfforts = efforts.flatten
-//      effortsMap = efforts.map(x => (x(1), x(0)))
-//    } yield effortsMap).flatten
-//
-//    val dayMap = doMap.groupBy(_._1).map(s => (s._1, s._2.map(t => t._2.toInt).sum))
-//    Map(gameNumber -> dayMap)
-//  }
   def createMapLine(str: String): Map[String, List[(String, String)]] = {
     val gameNumberParts = str.split(":").map(_.trim).toList
     val gameDayAttempts = gameNumberParts.reverse.head.split(";").toList
@@ -87,26 +73,12 @@ case class Puzzle3(value: List[String]) extends Puzzle {
         case _ => true
       }
     }))
-      println(s"Result of puzzle 2 is: ${lefts.map(s => s._1.toInt).sum}")
+    println(s"Result of puzzle 2 is: ${lefts.map(s => s._1.toInt).sum}")
   }
 }
 
 case class Puzzle4(value: List[String]) extends Puzzle {
 
-  //  def createMapLine(str: String): Map[String, Map[String, Int]] = {
-  //    val gameNumberParts = str.split(":").map(_.trim).toList
-  //    val gameDayAttempts = gameNumberParts.reverse.head.split(";").toList
-  //    val gameNumber = gameNumberParts.head.split(" ").toList.reverse.head
-  //    val doMap = (for {
-  //      attempt <- gameDayAttempts
-  //      efforts = attempt.split(", ").toList.map(x => x.trim.split(" "))
-  //      //flattenedEfforts = efforts.flatten
-  //      effortsMap = efforts.map(x => (x(1), x(0)))
-  //    } yield effortsMap).flatten
-  //
-  //    val dayMap = doMap.groupBy(_._1).map(s => (s._1, s._2.map(t => t._2.toInt).sum))
-  //    Map(gameNumber -> dayMap)
-  //  }
   def createMapLine(str: String): Map[String, Map[String, Int]] = {
     val gameNumberParts = str.split(":").map(_.trim).toList
     val gameDayAttempts = gameNumberParts.reverse.head.split(";").toList
@@ -125,15 +97,6 @@ case class Puzzle4(value: List[String]) extends Puzzle {
       line <- value
       mapline <- createMapLine(line)
     } yield mapline
-    println(result)
-//    val lefts = result.filter(el => el._2.forall(e => {
-//      e._1 match {
-//        case "red" => e._2.toInt <= 12
-//        case "green" => e._2.toInt <= 13
-//        case "blue" => e._2.toInt <= 14
-//        case _ => true
-//      }
-//    }))
     println(s"Result of puzzle 4 is: ${result.map(s => s._2.values.toList.map(_.toInt).product).sum}")
   }
 }
