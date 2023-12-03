@@ -186,18 +186,6 @@ case class Puzzle6(l: List[String]) extends Puzzle {
       all = numbersAbove ::: numbersBelow ::: numbersLeft ::: numbersRight
       if all.size == 2
     } yield all
-    val inBelow = for {
-      pos <- symbolPositions
-      numbersBelow = consol(pos._1 + 1).filter(l => l._2.toList.contains(pos._2) || l._2.toList.contains(pos._2 - 1) || l._2.toList.contains(pos._2 + 1))
-    } yield numbersBelow
-    val inLeft = for {
-      pos <- symbolPositions
-      numbersLeft = consol(pos._1).filter(l => l._2.toList.contains(pos._2 - 1))
-    } yield numbersLeft
-    val inRight = for {
-      pos <- symbolPositions
-      numbersRight = consol(pos._1).filter(l => l._2.toList.contains(pos._2 + 1))
-    } yield numbersRight
      println(s"Result of puzzle 6 is: ${allNumbers.map(s => s(0)._1 * s(1)._1).sum}")
   }
 
