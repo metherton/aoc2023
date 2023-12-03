@@ -7,13 +7,15 @@ trait Puzzle {
 
 object Puzzles {
   val sourceLists = (for {
-    i <- 1 to 2
+    i <- 1 to 3
   } yield Source.fromFile(s"/Users/martinetherton/Developer/projects/be/scala/aoc2023/src/$i.txt").getLines.toList).toList
   val puzzles = List(
     new Puzzle1(sourceLists(0)),
     new Puzzle2(sourceLists(0)),
     new Puzzle3(sourceLists(1)),
     new Puzzle4(sourceLists(1)),
+    new Puzzle5(sourceLists(2)),
+    new Puzzle6(sourceLists(2)),
   )
 
 }
@@ -64,7 +66,6 @@ case class Puzzle3(value: List[String]) extends Puzzle {
       line <- value
       mapline <- createMapLine(line)
     } yield mapline
-    println(result)
     val lefts = result.filter(el => el._2.forall(e => {
       e._1 match {
         case "red" => e._2.toInt <= 12
@@ -73,7 +74,7 @@ case class Puzzle3(value: List[String]) extends Puzzle {
         case _ => true
       }
     }))
-    println(s"Result of puzzle 2 is: ${lefts.map(s => s._1.toInt).sum}")
+    println(s"Result of puzzle 3 is: ${lefts.map(s => s._1.toInt).sum}")
   }
 }
 
@@ -86,8 +87,7 @@ case class Puzzle4(value: List[String]) extends Puzzle {
     val doMap = (for {
       attempt <- gameDayAttempts
       efforts <- attempt.split(", ").toList.map(x => x.trim.split(" "))
-      effortsMap = (efforts(0), efforts(1))
-    } yield effortsMap)
+    } yield (efforts(0), efforts(1)))
     val dayMap = doMap.groupBy(_._2).map(x => (x._1, x._2.map(y => y._1.toInt).max))
     Map(gameNumber -> dayMap)
   }
@@ -99,4 +99,106 @@ case class Puzzle4(value: List[String]) extends Puzzle {
     } yield mapline
     println(s"Result of puzzle 4 is: ${result.map(s => s._2.values.toList.map(_.toInt).product).sum}")
   }
+}
+
+case class Puzzle5(l: List[String]) extends Puzzle {
+  override def run(): Unit = {
+    val linesWithIndex = l.zipWithIndex
+    val symbolPositions = for {
+      line <- linesWithIndex
+      ch <- line._1.zipWithIndex
+      if !ch._1.isDigit && ch._1 != '.'
+    } yield (line._2, ch._2)
+    def getNumbersAndPosition(line: String) = {
+      for {
+        d <- line.zipWithIndex
+        if d._1.isDigit
+      } yield (d._1, d._2)
+    }
+    val numbersAndPositions = for {
+      line <- l
+      np = getNumbersAndPosition(line)
+    } yield np
+
+    val consol = for {
+      np <- numbersAndPositions
+    } yield (np.foldLeft(List[(Int, List[Int])]())((b, a) => a match {
+      case (ch, pos) if (b.size > 0 && (b.head._2.head - a._2).abs == 1) => ((b.head._1.toString + ch.toString).toInt, pos :: b.head._2) :: b.tail
+      case (ch, pos) if (b.size > 0) => (a._1.toString.toInt, List(a._2)) :: b
+      case (ch, pos)  => List((ch.toString.toInt, List(pos)))
+    }))
+
+    val inAbove = ((for {
+      pos <- symbolPositions
+      numbersAbove = consol(pos._1 - 1).filter(l => l._2.toList.contains(pos._2) || l._2.toList.contains(pos._2 - 1) || l._2.toList.contains(pos._2 + 1))
+    } yield numbersAbove).flatten).map(s => s._1).sum
+    val inBelow = ((for {
+      pos <- symbolPositions
+      numbersBelow = consol(pos._1 + 1).filter(l => l._2.toList.contains(pos._2) || l._2.toList.contains(pos._2 - 1) || l._2.toList.contains(pos._2 + 1))
+    } yield numbersBelow).flatten).map(s => s._1).sum
+    val inLeft = ((for {
+      pos <- symbolPositions
+      numbersLeft = consol(pos._1).filter(l => l._2.toList.contains(pos._2 - 1))
+    } yield numbersLeft).flatten).map(s => s._1).sum
+    val inRight = ((for {
+      pos <- symbolPositions
+      numbersRight = consol(pos._1).filter(l => l._2.toList.contains(pos._2 + 1))
+    } yield numbersRight).flatten).map(s => s._1).sum
+
+    println(s"Result of puzzle 5 is: ${inAbove + inLeft + inRight + inBelow}")  }
+}
+
+case class Puzzle6(l: List[String]) extends Puzzle {
+  override def run(): Unit = {
+    val linesWithIndex = l.zipWithIndex
+    val symbolPositions = for {
+      line <- linesWithIndex
+      ch <- line._1.zipWithIndex
+      if ch._1 == '*'
+    } yield (line._2, ch._2)
+
+    def getNumbersAndPosition(line: String) = {
+      for {
+        d <- line.zipWithIndex
+        if d._1.isDigit
+      } yield (d._1, d._2)
+    }
+
+    val numbersAndPositions = for {
+      line <- l
+      np = getNumbersAndPosition(line)
+    } yield np
+
+    val consol = for {
+      np <- numbersAndPositions
+    } yield (np.foldLeft(List[(Int, List[Int])]())((b, a) => a match {
+      case (ch, pos) if (b.size > 0 && (b.head._2.head - a._2).abs == 1) => ((b.head._1.toString + ch.toString).toInt, pos :: b.head._2) :: b.tail
+      case (ch, pos) if (b.size > 0) => (a._1.toString.toInt, List(a._2)) :: b
+      case (ch, pos) => List((ch.toString.toInt, List(pos)))
+    }))
+
+    val allNumbers = for {
+      pos <- symbolPositions
+      numbersAbove = consol(pos._1 - 1).filter(l => l._2.toList.contains(pos._2) || l._2.toList.contains(pos._2 - 1) || l._2.toList.contains(pos._2 + 1))
+      numbersBelow = consol(pos._1 + 1).filter(l => l._2.toList.contains(pos._2) || l._2.toList.contains(pos._2 - 1) || l._2.toList.contains(pos._2 + 1))
+      numbersLeft = consol(pos._1).filter(l => l._2.toList.contains(pos._2 - 1))
+      numbersRight = consol(pos._1).filter(l => l._2.toList.contains(pos._2 + 1))
+      all = numbersAbove ::: numbersBelow ::: numbersLeft ::: numbersRight
+      if all.size == 2
+    } yield all
+    val inBelow = for {
+      pos <- symbolPositions
+      numbersBelow = consol(pos._1 + 1).filter(l => l._2.toList.contains(pos._2) || l._2.toList.contains(pos._2 - 1) || l._2.toList.contains(pos._2 + 1))
+    } yield numbersBelow
+    val inLeft = for {
+      pos <- symbolPositions
+      numbersLeft = consol(pos._1).filter(l => l._2.toList.contains(pos._2 - 1))
+    } yield numbersLeft
+    val inRight = for {
+      pos <- symbolPositions
+      numbersRight = consol(pos._1).filter(l => l._2.toList.contains(pos._2 + 1))
+    } yield numbersRight
+     println(s"Result of puzzle 6 is: ${allNumbers.map(s => s(0)._1 * s(1)._1).sum}")
+  }
+
 }
