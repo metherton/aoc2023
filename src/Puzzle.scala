@@ -7,7 +7,7 @@ trait Puzzle {
 
 object Puzzles {
   val sourceLists = (for {
-    i <- 1 to 3
+    i <- 1 to 4
   } yield Source.fromFile(s"/Users/martinetherton/Developer/projects/be/scala/aoc2023/src/$i.txt").getLines.toList).toList
   val puzzles = List(
     new Puzzle1(sourceLists(0)),
@@ -16,6 +16,8 @@ object Puzzles {
     new Puzzle4(sourceLists(1)),
     new Puzzle5(sourceLists(2)),
     new Puzzle6(sourceLists(2)),
+    new Puzzle7(sourceLists(3)),
+    new Puzzle8(sourceLists(3)),
   )
 
 }
@@ -189,4 +191,59 @@ case class Puzzle6(l: List[String]) extends Puzzle {
      println(s"Result of puzzle 6 is: ${allNumbers.map(s => s(0)._1 * s(1)._1).sum}")
   }
 
+}
+
+case class Puzzle7(l: List[String]) extends Puzzle {
+  override def run(): Unit = {
+    val list = l.map(s => s.split("\\:")(1)).toList.map(s => s.split("\\|").map(_.trim).toList.map(s => s.split("\\s+").map(_.toInt).toList))
+    val result = for {
+      card <- list
+      myNos = card(0)
+      possNos = card(1)
+      winningNos = myNos.filter(x => possNos.contains(x))
+    } yield winningNos
+
+    println(s"Result of puzzle 7 is: ${result.map(l => if (l.size == 0) 0 else Math.pow(2.0, l.size - 1).toInt).sum}")
+  }
+
+}
+
+case class Puzzle8(l: List[String]) extends Puzzle {
+
+  override def run(): Unit = {
+    val list = l.map(s => s.split("\\:")(1)).toList.map(s => s.split("\\|").map(_.trim).toList.map(s => s.split("\\s+").map(_.toInt).toList))
+
+//    def accumulate(i: Int): List[(Int, Int)] = {
+//      if (i < 0)
+//        List((0,0))
+//      else {
+//        for {
+//          cards <- accumulate(i - 1)
+//          myNos = list(i)(0)
+//          posNos = list(i)(1)
+//          winningNos = myNos.filter(s => posNos.contains(s)).size
+//          card <- i + 1 to  i + winningNos
+//          myCopyNos = list(card)(0)
+//          posCopyNos = list(card)(1)
+//          copyWinningNos = myCopyNos.filter(s => posCopyNos.contains(s)).size
+//        } yield (winningNos, copyWinningNos)
+//      }
+//    }
+
+    def winningNos(myNos: List[Int], posNos: List[Int]): Int =
+      myNos.filter(s => posNos.contains(s)).size
+
+    def accumulate(i: Int): List[Int] = {
+      if (i == 0) List()
+      else
+        for {
+          nos <- accumulate(i - 1)
+          copyNos <- i to i + winningNos(list(i)(0), list(i)(1))
+        } yield copyNos
+    }
+
+    val result = accumulate(list.size - 1)
+
+    println(s"Result of puzzle 8 is: ${result}")
+  }
 }
