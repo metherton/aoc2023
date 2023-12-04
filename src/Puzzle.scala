@@ -211,7 +211,7 @@ case class Puzzle7(l: List[String]) extends Puzzle {
 case class Puzzle8(l: List[String]) extends Puzzle {
 
   override def run(): Unit = {
-    val list = l.map(s => s.split("\\:")(1)).toList.map(s => s.split("\\|").map(_.trim).toList.map(s => s.split("\\s+").map(_.toInt).toList))
+    val list: List[List[List[Int]]] = l.map(s => s.split("\\:")(1)).toList.map(s => s.split("\\|").map(_.trim).toList.map(s => s.split("\\s+").map(_.toInt).toList))
 
 //    def accumulate(i: Int): List[(Int, Int)] = {
 //      if (i < 0)
@@ -233,16 +233,27 @@ case class Puzzle8(l: List[String]) extends Puzzle {
     def winningNos(myNos: List[Int], posNos: List[Int]): Int =
       myNos.filter(s => posNos.contains(s)).size
 
-    def accumulate(i: Int): List[Int] = {
-      if (i == 0) List()
-      else
-        for {
-          nos <- accumulate(i - 1)
-          copyNos <- i to i + winningNos(list(i)(0), list(i)(1))
-        } yield copyNos
+//    def accumulate(i: Int): List[Int] = {
+//      if (i == 0) List()
+//      else
+//        for {
+//          nos <- accumulate(i - 1)
+//          copyNos <- i to i + winningNos(list(i)(0), list(i)(1))
+//        } yield copyNos
+//    }
+
+    def accumulate(l: List[List[List[Int]]]): Int = l match {
+      case h :: t => {
+        val myNos = h(0)
+        val posNos = h(1)
+        val winningNos = myNos.filter(s => posNos.contains(s)).size
+        val copyRange = t.take(winningNos)
+        1 + accumulate(copyRange) + accumulate(t)
+      }
+      case Nil => 0
     }
 
-    val result = accumulate(list.size - 1)
+    val result = accumulate(list)
 
     println(s"Result of puzzle 8 is: ${result}")
   }
