@@ -8,7 +8,7 @@ trait Puzzle {
 object Puzzles {
   val sourceLists = (for {
     i <- 1 to 4
-  } yield Source.fromFile(s"/Users/martinetherton/Developer/projects/be/scala/aoc2023/src/$i.txt").getLines.toList).toList
+  } yield Source.fromFile(s"/Users/dt10dw/Developer/ING/code/backend/aoc2023/src/$i.txt").getLines.toList).toList
   val puzzles = List(
     new Puzzle1(sourceLists(0)),
     new Puzzle2(sourceLists(0)),
@@ -230,9 +230,6 @@ case class Puzzle8(l: List[String]) extends Puzzle {
 //      }
 //    }
 
-    def winningNos(myNos: List[Int], posNos: List[Int]): Int =
-      myNos.filter(s => posNos.contains(s)).size
-
 //    def accumulate(i: Int): List[Int] = {
 //      if (i == 0) List()
 //      else
@@ -242,18 +239,29 @@ case class Puzzle8(l: List[String]) extends Puzzle {
 //        } yield copyNos
 //    }
 
-    def accumulate(l: List[List[List[Int]]]): Int = l match {
-      case h :: t => {
-        val myNos = h(0)
-        val posNos = h(1)
-        val winningNos = myNos.filter(s => posNos.contains(s)).size
-        val copyRange = t.take(winningNos)
-        1 + accumulate(copyRange) + accumulate(t)
+    def accumulate(i: Int): Int = {
+      def loop(copies: List[List[List[Int]]], accum: Int): Int = copies match {
+        case h :: t => {
+          val myNos = h(0)
+          val posNos = h(1)
+          val nos = myNos.filter(s => posNos.contains(s)).size
+          loop(t, accum + nos)
+        }
+        case Nil => accum
       }
-      case Nil => 0
+      if (i >= list.size) 0
+      else {
+        (for {
+          j <- i to list.size - 1
+          myNos = list(j)(0)
+          posNos = list(j)(1)
+          numCards = myNos.filter(s => posNos.contains(s)).size
+          totalNumCards = 1 + loop(list.slice(j + 1, j + numCards + 1), numCards)
+        } yield totalNumCards).sum
+      }
     }
 
-    val result = accumulate(list)
+    val result = accumulate(0)
 
     println(s"Result of puzzle 8 is: ${result}")
   }
