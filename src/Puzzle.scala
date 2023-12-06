@@ -235,13 +235,13 @@ case class Puzzle9(lc: List[String]) extends Puzzle {
     val seedsToFind = lc.head.split(":")(1).trim.split(" ").map(_.toLong).toList
     val l  = lc.tail.zipWithIndex
     val maps = l.map {
-      case ("seed-to-soil map:", i) => ("seed-soil", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
-      case ("soil-to-fertilizer map:", i) => ("soil-fertilizer", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
-      case ("fertilizer-to-water map:", i) => ("fertilizer-water", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
-      case ("water-to-light map:", i) => ("water-light", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
-      case ("light-to-temperature map:", i) => ("light-temperature", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
-      case ("temperature-to-humidity map:", i) => ("temperature-humidity", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
-      case ("humidity-to-location map:", i) => ("humidity-location", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
+      case ("seed-to-soil map:", i) => ("seed-soil", l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("soil-to-fertilizer map:", i) => ("soil-fertilizer", l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1))
+      case ("fertilizer-to-water map:", i) => ("fertilizer-water", l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1))
+      case ("water-to-light map:", i) => ("water-light", l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1))
+      case ("light-to-temperature map:", i) => ("light-temperature", l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1))
+      case ("temperature-to-humidity map:", i) => ("temperature-humidity", l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1))
+      case ("humidity-to-location map:", i) => ("humidity-location", l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1))
       case _ => List()
     }.filter(_ != List())
     println(s"Result of puzzle 9 is: ${seedsToFind} from ${maps}")
