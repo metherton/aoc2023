@@ -7,7 +7,7 @@ trait Puzzle {
 
 object Puzzles {
   val sourceLists = (for {
-    i <- 1 to 4
+    i <- 1 to 5
   } yield Source.fromFile(s"/Users/martinetherton/Developer/projects/be/scala/aoc2023/src/$i.txt").getLines.toList).toList
   val puzzles = List(
     new Puzzle1(sourceLists(0)),
@@ -18,6 +18,7 @@ object Puzzles {
     new Puzzle6(sourceLists(2)),
     new Puzzle7(sourceLists(3)),
     new Puzzle8(sourceLists(3)),
+    new Puzzle9(sourceLists(4)),
   )
 
 }
@@ -226,5 +227,23 @@ case class Puzzle8(l: List[String]) extends Puzzle {
 
     println(s"Result of puzzle 8 is: ${loop(listWithIndex).size}")
 
+  }
+}
+
+case class Puzzle9(lc: List[String]) extends Puzzle {
+  override def run(): Unit = {
+    val seedsToFind = lc.head.split(":")(1).trim.split(" ").map(_.toLong).toList
+    val l  = lc.tail.zipWithIndex
+    val maps = l.map {
+      case ("seed-to-soil map:", i) => ("seed-soil", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
+      case ("soil-to-fertilizer map:", i) => ("soil-fertilizer", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
+      case ("fertilizer-to-water map:", i) => ("fertilizer-water", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
+      case ("water-to-light map:", i) => ("water-light", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
+      case ("light-to-temperature map:", i) => ("light-temperature", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
+      case ("temperature-to-humidity map:", i) => ("temperature-humidity", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
+      case ("humidity-to-location map:", i) => ("humidity-location", l.slice(i + 1, l.size).takeWhile(_._1 != ""))
+      case _ => List()
+    }.filter(_ != List())
+    println(s"Result of puzzle 9 is: ${seedsToFind} from ${maps}")
   }
 }
