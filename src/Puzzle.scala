@@ -19,6 +19,7 @@ object Puzzles {
     new Puzzle7(sourceLists(3)),
     new Puzzle8(sourceLists(3)),
     new Puzzle9(sourceLists(4)),
+    new Puzzle10(sourceLists(4)),
   )
 
 }
@@ -232,54 +233,92 @@ case class Puzzle8(l: List[String]) extends Puzzle {
 
 case class Puzzle9(lc: List[String]) extends Puzzle {
 
-//  val l1 = List(List(50, 98, 2), List(52, 50, 4))
-//  val l2 = l1.foldLeft(Map[Int, Int]())((b, a) => b ++ (for {
-//    i <- 0 to a(2) - 1
-//    source = i + a(1)
-//    destination = i + a(0)
-//  } yield (source, destination)).toMap
-//  )
-//  println(s"map is ${l2}")
-
   override def run(): Unit = {
 
-    def convertListToMap(l1: List[List[Long]]): Map[Long, Long] = {
-
-      lazy val m = l1.foldLeft(Map[Long, Long]())((b, a) => b ++ (for {
-        i <- 0L to a(2) - 1L
-        source = i + a(1)
-        destination = i + a(0)
-      } yield (source, destination)).toMap
-      )
-      println(s"converting $m")
-      m.toMap
+    def getKeyValue(key: String, a: Long, maps: Map[String, List[List[Long]]]) = {
+      val ranges = maps(key)
+     // println(s"ranges are ${ranges}")
+      val l = for {
+        row <- ranges
+        if a >= row(1) && a <= row(1) + row(2)
+        found = true
+        keyVal = a + row(0) - row(1)
+      } yield (keyVal, found)
+      val m = if (l.size > 0 && l.head._2) l.head._1 else a
+      m
     }
 
     val seedsToFind = lc.head.split(":")(1).trim.split(" ").map(_.toLong).toList
     val l  = lc.tail.zipWithIndex
-    val maps = l.collect {
-      case ("seed-to-soil map:", i) =>                       ("seed-soil" -> convertListToMap(l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong))))
-      case ("soil-to-fertilizer map:", i) =>           ("soil-fertilizer" -> convertListToMap(l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong))))
-      case ("fertilizer-to-water map:", i) =>         ("fertilizer-water" -> convertListToMap(l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong))))
-      case ("water-to-light map:", i) =>                   ("water-light" -> convertListToMap(l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong))))
-      case ("light-to-temperature map:", i) =>       ("light-temperature" -> convertListToMap(l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong))))
-      case ("temperature-to-humidity map:", i) => ("temperature-humidity" -> convertListToMap(l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong))))
-      case ("humidity-to-location map:", i) =>       ("humidity-location" -> convertListToMap(l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong))))
+    val maps: Map[String, List[List[Long]]] = l.collect {
+      case ("seed-to-soil map:", i) =>                       ("seed-soil" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("soil-to-fertilizer map:", i) =>           ("soil-fertilizer" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("fertilizer-to-water map:", i) =>         ("fertilizer-water" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("water-to-light map:", i) =>                   ("water-light" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("light-to-temperature map:", i) =>       ("light-temperature" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("temperature-to-humidity map:", i) => ("temperature-humidity" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("humidity-to-location map:", i) =>       ("humidity-location" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
       //case _ => List()
     }.to(Map)
-    println("created map")
-    //}.filter(_ != List())
+   // println("created map")
     val locations = seedsToFind.foldLeft(List[Long]())((b, a) => {
-      val i = maps("seed-soil").getOrElse(a, a)
-      println(s"value: ${maps("seed-soil").getOrElse(a, a)}")
-      val j = maps("soil-fertilizer").getOrElse(i, i)
-      val k = maps("fertilizer-water").getOrElse(j, j)
-      val l = maps("water-light").getOrElse(k, k)
-      val m = maps("light-temperature").getOrElse(l, l)
-      val n = maps("temperature-humidity").getOrElse(m, m)
-      val o = maps("humidity-location").getOrElse(n, n)
+      val i = getKeyValue("seed-soil", a, maps)
+      val j = getKeyValue("soil-fertilizer", i, maps)
+      val k = getKeyValue("fertilizer-water", j, maps)
+      val l = getKeyValue("water-light", k, maps)
+      val m = getKeyValue("light-temperature", l, maps)
+      val n = getKeyValue("temperature-humidity", m, maps)
+      val o = getKeyValue("humidity-location", n, maps)
       o :: b
     })
     println(s"Result of puzzle 9 is: ${locations.min}")
+  }
+}
+
+case class Puzzle10(lc: List[String]) extends Puzzle {
+
+  override def run(): Unit = {
+
+    def getKeyValue(key: String, a: Long, maps: Map[String, List[List[Long]]]) = {
+      val ranges = maps(key)
+      val l = for {
+        row <- ranges
+        if a >= row(1) && a <= row(1) + row(2)
+        found = true
+        keyVal = a + row(0) - row(1)
+      } yield (keyVal, found)
+      val m = if (l.size > 0 && l.head._2) l.head._1 else a
+      m
+    }
+
+    //val seedsToFind = lc.head.split(":")(1).trim.split(" ").map(_.toLong).toList
+    val seedTuples = lc.head.split(":")(1).trim.split(" ").map(_.toLong).toList.grouped(2)
+    val seedsToFind = seedTuples.toList.map(s => (for {
+      i <- 0L to s(1) - 1L
+      x = println(i)
+    } yield s(0) + i)).flatten
+    val l  = lc.tail.zipWithIndex
+    val maps: Map[String, List[List[Long]]] = l.collect {
+      case ("seed-to-soil map:", i) =>                       ("seed-soil" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("soil-to-fertilizer map:", i) =>           ("soil-fertilizer" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("fertilizer-to-water map:", i) =>         ("fertilizer-water" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("water-to-light map:", i) =>                   ("water-light" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("light-to-temperature map:", i) =>       ("light-temperature" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("temperature-to-humidity map:", i) => ("temperature-humidity" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      case ("humidity-to-location map:", i) =>       ("humidity-location" -> l.slice(i + 1, l.size).takeWhile(_._1 != "").map(_._1).map(s => s.split(" ").toList.map(_.toLong)))
+      //case _ => List()
+    }.to(Map)
+  //  println("created map")
+    val locations = seedsToFind.foldLeft(List[Long]())((b, a) => {
+      val i = getKeyValue("seed-soil", a, maps)
+      val j = getKeyValue("soil-fertilizer", i, maps)
+      val k = getKeyValue("fertilizer-water", j, maps)
+      val l = getKeyValue("water-light", k, maps)
+      val m = getKeyValue("light-temperature", l, maps)
+      val n = getKeyValue("temperature-humidity", m, maps)
+      val o = getKeyValue("humidity-location", n, maps)
+      o :: b
+    })
+    println(s"Result of puzzle 10 is: ${locations.min}")
   }
 }
