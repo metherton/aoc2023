@@ -36,15 +36,17 @@ case class Puzzle1(l: List[String]) extends Puzzle {
 
 case class Puzzle2(l: List[String]) extends Puzzle {
   override def run(): Unit = {
-    val DigitFound = """([0-9]|(one|two|three|four|five|six|seven|eight|nine|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin))""".r
-    val textToDigitMap = Map("one" -> "1", "two" -> "2", "three" -> "3", "four" -> "4", "five" -> "5", "six" -> "6", "seven" -> "7", "eight" -> "8", "nine" -> "9", "eno" -> "1", "owt" -> "2", "eerht" -> "3", "ruof" -> "4", "evif" -> "5", "xis" -> "6", "neves" -> "7", "thgie" -> "8", "enin" -> "9", "1" -> "1", "2" -> "2", "3" -> "3", "4" -> "4", "5" -> "5", "6" -> "6", "7" -> "7", "8" -> "8", "9" -> "9")
-    val result = (for {
-      line <- l
-      first = textToDigitMap(DigitFound.findFirstIn(line).toList.head.toString())
-      second = textToDigitMap(DigitFound.findFirstIn(line.reverse).toList.head.toString())
-      sumOfDigits = first + second
-    } yield sumOfDigits.toInt).sum
+    val DigitFound = """([0-9]|(one|two|three|four|five|six|seven|eight|nine))""".r
+    val textToDigitMap = Map("one" -> "1", "two" -> "2", "three" -> "3", "four" -> "4", "five" -> "5", "six" -> "6", "seven" -> "7", "eight" -> "8", "nine" -> "9", "1" -> "1", "2" -> "2", "3" -> "3", "4" -> "4", "5" -> "5", "6" -> "6", "7" -> "7", "8" -> "8", "9" -> "9")
+
+    val result = l.map(line =>
+        line.tails.toList.map(linePart => DigitFound.findPrefixOf(linePart)))
+      .map(lOfOp => lOfOp.filter(s => s.isDefined))
+      .map(lOfVal => (lOfVal.head.get, lOfVal.last.get))
+      .map(tup => textToDigitMap(tup._1) + textToDigitMap(tup._2))
+      .map(_.toInt).sum
     println(s"Result of puzzle 2 is: ${result}")
+
   }
 }
 
