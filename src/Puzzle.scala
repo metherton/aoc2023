@@ -28,7 +28,7 @@ case class Puzzle1(l: List[String]) extends Puzzle {
   override def run(): Unit = {
     val result = (for {
       line <- l
-      sumOfDigits = line.find(i => i.isDigit).head.toString + line.reverse.find(i => i.isDigit).head.toString
+      sumOfDigits = line.find(i => i.isDigit).head.toString + line.findLast(i => i.isDigit).head.toString
     } yield sumOfDigits.toInt).sum
     println(s"Result of puzzle 1 is: ${result}")
   }
